@@ -10,6 +10,9 @@ pub struct WinSize {
     pub w: f32,
     pub h: f32,
 }
+struct GameTextures{
+    player: Handle<Image>,
+}
 // region -- end resources
 
 fn main() {
@@ -39,18 +42,25 @@ fn setup_system(
     let (win_w, win_h) = (window.width(), window.height());
     // pos for window
     //window.set_position(IVec2::new(2780, 4900));
+
+    // adding WinSize Resource
     let win_size = WinSize { w: win_w, h: win_h };
     commands.insert_resource(win_size);
+    // adding GameTextures Resource
+    let game_textures = GameTextures {
+        player: asset_server.load(PLAYER_SPRITE),
+    };
+    commands.insert_resource(game_textures);
 }
 fn player_spawn_system(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
+    game_textures: Res<GameTextures>,
     win_size: Res<WinSize>,
 ) {
     //add player
     let bottom = -win_size.h / 2.0;
     commands.spawn_bundle(SpriteBundle {
-        texture: asset_server.load(PLAYER_SPRITE),
+        texture: game_textures.player.clone(),
         transform: Transform {
             translation: Vec3::new(0.0, bottom + PLAYER_SIZE.1 / 2.0 * SPRITE_SCALE + 5.0, 10.0),
             scale: Vec3::new(SPRITE_SCALE, SPRITE_SCALE, 1.0),
