@@ -24,6 +24,7 @@ const ENEMY_SPRITE: &str = "enemy_a_01.png";
 const ENEMY_SIZE: (f32, f32) = (144.0, 75.0);
 const ENEMY_LASER_SPRITE: &str = "laser_b_01.png";
 const ENEMY_LASER_SIZE: (f32, f32) = (17.0, 55.0);
+const ENEMY_MAX: u32 = 5;
 //explosion
 const EXPLOSION_SHEET: &str = "explo_a_sheet.png";
 const EXPLOSION_LEN: usize = 16;
@@ -45,6 +46,7 @@ struct GameTextures {
     enemy_laser: Handle<Image>,
     explosion: Handle<TextureAtlas>,
 }
+struct EnemyCount(u32);
 // endregion: resources
 
 fn main() {
@@ -99,6 +101,7 @@ fn setup_system(
         explosion,
     };
     commands.insert_resource(game_textures);
+    commands.insert_resource(EnemyCount(0));
 }
 fn movable_system(
     mut commands: Commands,
@@ -126,6 +129,7 @@ fn movable_system(
 
 fn player_laser_hit_system(
     mut commands: Commands,
+    mut enemy_count: ResMut<EnemyCount>,
     laser_query: Query<(Entity, &Transform, &SpriteSize), (With<Laser>, With<FromPlayer>)>,
     enemy_query: Query<(Entity, &Transform, &SpriteSize), With<Enemy>>,
 ) {
@@ -156,6 +160,7 @@ fn player_laser_hit_system(
                 // remove the enemy
                 commands.entity(enemy_entity).despawn();
                 despawn_entites.insert(enemy_entity);
+                enemy_count.0 -= 1;
                 //remove laser
                 commands.entity(laser_entity).despawn();
                 despawn_entites.insert(laser_entity);
