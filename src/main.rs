@@ -1,4 +1,7 @@
-#![allow(unused)] //comment out later
+#![allow(unused)]
+use std::collections::HashSet;
+
+//comment out later
 use bevy::math::Vec3Swizzles;
 use bevy::{prelude::*, sprite::collide_aabb::collide};
 use components::{
@@ -126,12 +129,19 @@ fn player_laser_hit_system(
     laser_query: Query<(Entity, &Transform, &SpriteSize), (With<Laser>, With<FromPlayer>)>,
     enemy_query: Query<(Entity, &Transform, &SpriteSize), With<Enemy>>,
 ) {
+    let mut despawn_entites: HashSet<Entity> = HashSet::new();
     //iterate through the laser
     for (laser_entity, laser_tf, laser_size) in laser_query.iter() {
+        if despawn_entites.contains(&laser_entity) {
+            continue;
+        }
         let laser_scale = Vec2::from(laser_tf.scale.xy());
 
         //iterate through enemies
         for (enemy_entity, enemy_tf, enemy_size) in enemy_query.iter() {
+            if despawn_entites.contains(&enemy_entity) || despawn_entites.contains(&laser_entity) {
+                continue;
+            }
             let enemy_scale = Vec2::from(enemy_tf.scale.xy());
             //determine if collison
             let collision = collide(
@@ -145,9 +155,10 @@ fn player_laser_hit_system(
             if let Some(_) = collision {
                 // remove the enemy
                 commands.entity(enemy_entity).despawn();
+                despawn_entites.insert(enemy_entity);
                 //remove laser
                 commands.entity(laser_entity).despawn();
-
+                despawn_entites.insert(laser_entity);
                 //spawn the explosion to spawn
                 commands
                     .spawn()
