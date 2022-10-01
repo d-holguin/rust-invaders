@@ -14,6 +14,8 @@ impl Plugin for PlayerPlugin {
     }
 }
 
+
+
 fn player_spawn_system(
     mut commands: Commands,
     game_textures: Res<GameTextures>,
